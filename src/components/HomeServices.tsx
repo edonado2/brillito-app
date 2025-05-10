@@ -49,7 +49,7 @@ export const HomeServices: React.FC<Props> = ({ navigation }) => {
                 />
               </View>
               <Text style={styles.serviceTitle}>{service.title}</Text>
-              <Text style={styles.serviceDescription} numberOfLines={2}>
+              <Text style={styles.serviceDescription} numberOfLines={4}>
                 {service.description}
               </Text>
               <View style={styles.serviceFooter}>
@@ -66,11 +66,11 @@ export const HomeServices: React.FC<Props> = ({ navigation }) => {
 
 const styles = StyleSheet.create({
   container: {
-    marginVertical: spacing.md,
+    marginVertical: spacing.xl,
   },
   header: {
-    paddingHorizontal: spacing.lg,
-    marginBottom: spacing.md,
+    paddingHorizontal: spacing.xl,
+    marginBottom: spacing.lg,
   },
   title: {
     ...textStyles.titleLarge,
@@ -82,14 +82,16 @@ const styles = StyleSheet.create({
     color: colors.text.secondary,
   },
   scrollContent: {
-    paddingHorizontal: spacing.lg,
-    gap: spacing.md,
+    paddingHorizontal: spacing.xl,
+    gap: spacing.lg,
   },
   serviceCard: {
-    width: 280,
+    width: 240,
+    height: 280,
     padding: spacing.lg,
     borderRadius: borderRadius.lg,
     backgroundColor: colors.surface.primary,
+    marginHorizontal: spacing.sm,
     ...Platform.select({
       ios: {
         shadowColor: colors.utility.shadow,
@@ -103,9 +105,9 @@ const styles = StyleSheet.create({
     }),
   },
   serviceIconContainer: {
-    width: 64,
-    height: 64,
-    borderRadius: borderRadius.lg,
+    width: 48,
+    height: 48,
+    borderRadius: borderRadius.md,
     backgroundColor: colors.primary.light,
     alignItems: 'center',
     justifyContent: 'center',
@@ -114,17 +116,25 @@ const styles = StyleSheet.create({
   serviceTitle: {
     ...textStyles.titleMedium,
     color: colors.text.primary,
-    marginBottom: spacing.xs,
+    marginBottom: spacing.md,
+    lineHeight: 24,
   },
   serviceDescription: {
-    ...textStyles.bodyMedium,
+    ...textStyles.bodyLarge,
     color: colors.text.secondary,
     marginBottom: spacing.md,
+    flex: 1,
+    lineHeight: 22,
+    opacity: 0.9,
   },
   serviceFooter: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    marginTop: 'auto',
+    paddingTop: spacing.md,
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
   },
   serviceDuration: {
     ...textStyles.bodyMedium,

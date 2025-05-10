@@ -51,10 +51,8 @@ const Navigation = () => {
       }}
     >
       {user ? (
-        // Authenticated stack
         <RootStack.Screen name="Main" component={MainNavigator} />
       ) : (
-        // Auth stack
         <RootStack.Screen name="Auth" component={AuthNavigator} />
       )}
     </RootStack.Navigator>
@@ -66,10 +64,10 @@ SplashScreen.preventAutoHideAsync();
 
 export default function App() {
   const [fontsLoaded] = useFonts({
-    'Poppins_400Regular': Poppins_400Regular,
-    'Poppins_500Medium': Poppins_500Medium,
-    'Poppins_600SemiBold': Poppins_600SemiBold,
-    'Poppins_700Bold': Poppins_700Bold,
+    Poppins_400Regular,
+    Poppins_500Medium,
+    Poppins_600SemiBold,
+    Poppins_700Bold,
   });
 
   React.useEffect(() => {
@@ -84,14 +82,14 @@ export default function App() {
   }
 
   return (
-    <PaperProvider theme={theme}>
-      <SafeAreaProvider>
+    <SafeAreaProvider>
+      <PaperProvider theme={theme}>
         <AuthProvider>
           <NavigationContainer>
             <Navigation />
           </NavigationContainer>
         </AuthProvider>
-      </SafeAreaProvider>
-    </PaperProvider>
+      </PaperProvider>
+    </SafeAreaProvider>
   );
 }

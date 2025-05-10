@@ -15,7 +15,7 @@ import { ServicesScreen } from '../screens/ServicesScreen';
 import { SettingsScreen } from '../screens/SettingsScreen';
 import { BookingScreen } from '../screens/BookingScreen';
 import { BookingConfirmationScreen } from '../screens/BookingConfirmationScreen';
-import { ServiceDetailsScreen } from '../screens/ServiceDetailsScreen';
+import { ServiceDetailsScreen, HomeServiceDetailsScreen } from '../screens/ServiceDetailsScreen';
 import { BookingDetailsScreen } from '../screens/BookingDetailsScreen';
 import { EditProfileScreen } from '../screens/EditProfileScreen';
 import { NotificationsScreen } from '../screens/NotificationsScreen';
@@ -23,13 +23,13 @@ import { HelpScreen } from '../screens/HelpScreen';
 import { BookingsScreen } from '../screens/BookingsScreen';
 
 // Types
-import { MainStackParamList, MainTabParamList } from '../types/navigation';
+import { MainTabParamList, HomeStackParamList, ServicesStackParamList, BookingsStackParamList, ProfileStackParamList } from '../types/navigation';
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
-const HomeStack = createNativeStackNavigator();
-const ServicesStack = createNativeStackNavigator();
-const BookingsStack = createNativeStackNavigator();
-const ProfileStack = createNativeStackNavigator();
+const HomeStack = createNativeStackNavigator<HomeStackParamList>();
+const ServicesStack = createNativeStackNavigator<ServicesStackParamList>();
+const BookingsStack = createNativeStackNavigator<BookingsStackParamList>();
+const ProfileStack = createNativeStackNavigator<ProfileStackParamList>();
 
 const CustomHeader = ({ navigation, route, options, back }: any) => {
   const showBackButton = back !== undefined;
@@ -75,63 +75,73 @@ const CustomHeader = ({ navigation, route, options, back }: any) => {
   );
 };
 
-const HomeStackNavigator = () => (
-  <HomeStack.Navigator
-    screenOptions={{
-      header: (props) => <CustomHeader {...props} />,
-    }}
-  >
-    <HomeStack.Screen 
-      name="HomeMain" 
-      component={HomeScreen}
-      options={{ title: 'Inicio' }}
-    />
-    <HomeStack.Screen 
-      name="HomeServiceDetails" 
-      component={ServiceDetailsScreen}
-      options={{ title: 'Detalles del Servicio' }}
-    />
-    <HomeStack.Screen 
-      name="HomeBooking" 
-      component={BookingScreen}
-      options={{ title: 'Nueva Reserva' }}
-    />
-    <HomeStack.Screen 
-      name="HomeBookingConfirmation" 
-      component={BookingConfirmationScreen}
-      options={{ title: 'Confirmación' }}
-    />
-  </HomeStack.Navigator>
-);
+const HomeStackNavigator = () => {
+  const theme = useTheme();
+  
+  return (
+    <HomeStack.Navigator
+      screenOptions={{
+        header: (props) => <CustomHeader {...props} />,
+        animation: 'slide_from_right',
+      }}
+    >
+      <HomeStack.Screen 
+        name="HomeMain" 
+        component={HomeScreen}
+        options={{ title: 'Inicio' }}
+      />
+      <HomeStack.Screen 
+        name="HomeServiceDetails" 
+        component={HomeServiceDetailsScreen}
+        options={{ title: 'Detalles del Servicio' }}
+      />
+      <HomeStack.Screen 
+        name="HomeBooking" 
+        component={BookingScreen}
+        options={{ title: 'Nueva Reserva' }}
+      />
+      <HomeStack.Screen 
+        name="HomeBookingConfirmation" 
+        component={BookingConfirmationScreen}
+        options={{ title: 'Confirmación' }}
+      />
+    </HomeStack.Navigator>
+  );
+};
 
-const ServicesStackNavigator = () => (
-  <ServicesStack.Navigator
-    screenOptions={{
-      header: (props) => <CustomHeader {...props} />,
-    }}
-  >
-    <ServicesStack.Screen 
-      name="ServicesMain" 
-      component={ServicesScreen}
-      options={{ title: 'Servicios' }}
-    />
-    <ServicesStack.Screen 
-      name="ServicesDetails" 
-      component={ServiceDetailsScreen}
-      options={{ title: 'Detalles del Servicio' }}
-    />
-    <ServicesStack.Screen 
-      name="ServicesBooking" 
-      component={BookingScreen}
-      options={{ title: 'Nueva Reserva' }}
-    />
-    <ServicesStack.Screen 
-      name="ServicesBookingConfirmation" 
-      component={BookingConfirmationScreen}
-      options={{ title: 'Confirmación' }}
-    />
-  </ServicesStack.Navigator>
-);
+const ServicesStackNavigator = () => {
+  const theme = useTheme();
+  
+  return (
+    <ServicesStack.Navigator
+      screenOptions={{
+        header: (props) => <CustomHeader {...props} />,
+        animation: 'slide_from_right',
+      }}
+    >
+      <ServicesStack.Screen 
+        name="ServicesMain" 
+        component={ServicesScreen}
+        options={{ title: 'Servicios' }}
+      />
+      <ServicesStack.Screen 
+        name="ServicesDetails" 
+        component={ServiceDetailsScreen}
+        options={{ title: 'Detalles del Servicio' }}
+      />
+      <ServicesStack.Screen 
+        name="ServicesBooking" 
+        component={BookingScreen}
+        options={{ title: 'Nueva Reserva' }}
+      />
+      <ServicesStack.Screen 
+        name="ServicesBookingConfirmation" 
+        component={BookingConfirmationScreen}
+        options={{ title: 'Confirmación' }}
+      />
+    </ServicesStack.Navigator>
+  );
+};
 
 const BookingsStackNavigator = () => (
   <BookingsStack.Navigator

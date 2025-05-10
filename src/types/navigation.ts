@@ -34,7 +34,7 @@ export type HomeStackParamList = {
 export type ServicesStackParamList = {
   ServicesMain: undefined;
   ServicesDetails: { serviceId: string };
-  ServicesBooking: { serviceId: string };
+  ServicesBooking: { serviceId: string; serviceName: string };
   ServicesBookingConfirmation: { bookingId: string };
 };
 
@@ -53,7 +53,7 @@ export type ProfileStackParamList = {
   ProfileHelp: undefined;
 };
 
-// Drawer Navigator (using MainStackParamList as base)
+// Drawer Navigator
 export type MainDrawerParamList = HomeStackParamList & ServicesStackParamList & BookingsStackParamList & ProfileStackParamList & {
   Settings: undefined;
 };

@@ -5,6 +5,8 @@ import {
   ScrollView,
   Platform,
   KeyboardAvoidingView,
+  TouchableOpacity,
+  Modal,
 } from 'react-native';
 import {
   Text,
@@ -19,19 +21,18 @@ import {
   Divider,
   HelperText,
   SegmentedButtons,
-  Modal,
 } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { colors, spacing, borderRadius, elevation, textStyles, typography } from '../theme/theme';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { HomeStackParamList } from '../types/navigation';
+import { ServicesStackParamList } from '../types/navigation';
 import { useAuth } from '../context/AuthContext';
 import { AppHeader } from '../components/AppHeader';
 import { Calendar } from 'react-native-calendars';
 
-type Props = NativeStackScreenProps<HomeStackParamList, 'Booking'>;
+type Props = NativeStackScreenProps<ServicesStackParamList, 'ServicesBooking'>;
 
 const TIME_SLOTS = [
   '08:00', '09:00', '10:00', '11:00', '12:00', '13:00',
@@ -61,15 +62,9 @@ export const BookingScreen: React.FC<Props> = ({ route, navigation }) => {
   };
 
   const handleBooking = () => {
-    // TODO: Implement booking logic
-    const bookingId = '123'; // Replace with actual booking ID
-    navigation.navigate('BookingConfirmation', {
-      bookingId,
-      serviceName,
-      date: selectedDate,
-      time: selectedTime,
-      address,
-    });
+    if (validateForm()) {
+      setShowConfirmation(true);
+    }
   };
 
   const validateForm = () => {
@@ -88,13 +83,8 @@ export const BookingScreen: React.FC<Props> = ({ route, navigation }) => {
 
   const handleConfirmBooking = () => {
     setShowConfirmation(false);
-    // Handle booking submission
-    navigation.navigate('BookingConfirmation', {
+    navigation.navigate('ServicesBookingConfirmation', {
       bookingId: '123', // Replace with actual booking ID
-      serviceName: serviceName,
-      date: selectedDate,
-      time: selectedTime,
-      address,
     });
   };
 
@@ -148,22 +138,15 @@ export const BookingScreen: React.FC<Props> = ({ route, navigation }) => {
               <Text style={[textStyles.titleMedium, styles.sectionTitle]}>
                 Hora
               </Text>
-              <View style={styles.timeSlotsContainer}>
-                {TIME_SLOTS.map((time) => (
-                  <Chip
-                    key={time}
-                    selected={selectedTime === time}
-                    onPress={() => handleTimeSelect(time)}
-                    style={styles.timeChip}
-                    textStyle={[
-                      styles.timeChipText,
-                      selectedTime === time && styles.timeChipTextSelected,
-                    ]}
-                  >
-                    {time}
-                  </Chip>
-                ))}
-              </View>
+              <TouchableOpacity 
+                style={styles.timeSelector}
+                onPress={() => setShowTimeModal(true)}
+              >
+                <Text>{selectedTime || 'Seleccionar hora'}</Text>
+              </TouchableOpacity>
+              {errors.time && (
+                <Text style={styles.errorText}>{errors.time}</Text>
+              )}
 
               <Text style={[textStyles.titleMedium, styles.sectionTitle]}>
                 Dirección
@@ -176,7 +159,11 @@ export const BookingScreen: React.FC<Props> = ({ route, navigation }) => {
                 style={styles.input}
                 multiline
                 numberOfLines={3}
+                error={!!errors.address}
               />
+              {errors.address && (
+                <Text style={styles.errorText}>{errors.address}</Text>
+              )}
 
               <Text style={[textStyles.titleMedium, styles.sectionTitle]}>
                 Notas Adicionales
@@ -198,54 +185,81 @@ export const BookingScreen: React.FC<Props> = ({ route, navigation }) => {
               style={styles.bookButton}
               contentStyle={styles.bookButtonContent}
             >
-              Reservar Ahora
+              Confirmar Reserva
             </Button>
           </View>
         </ScrollView>
 
-        {/* Confirmation Dialog */}
-        <Portal>
-          <Dialog
-            visible={showConfirmation}
-            onDismiss={() => setShowConfirmation(false)}
-            style={styles.dialog}
-          >
-            <Dialog.Title style={[textStyles.headlineMedium, styles.dialogTitle]}>
-              Confirmar Reserva
-            </Dialog.Title>
-            <Dialog.Content>
-              <Text style={[textStyles.bodyLarge, styles.dialogText]}>
-                ¿Estás seguro que deseas confirmar tu reserva para el servicio de {serviceName}?
-              </Text>
-              <View style={styles.dialogSummary}>
-                <Text style={[textStyles.bodyMedium, styles.dialogSummaryText]}>
-                  {selectedDate} a las {selectedTime}
-                </Text>
-                <Text style={[textStyles.displayMedium, styles.dialogPrice]}>
-                  ${serviceName}
-                </Text>
+        <Modal
+          visible={showTimeModal}
+          transparent
+          animationType="slide"
+          onRequestClose={() => setShowTimeModal(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <View style={styles.timeModal}>
+              <Text style={styles.modalTitle}>Seleccionar Hora</Text>
+              <View style={styles.timeGrid}>
+                {TIME_SLOTS.map((time) => (
+                  <TouchableOpacity
+                    key={time}
+                    style={[
+                      styles.timeChip,
+                      selectedTime === time && styles.selectedTimeChip
+                    ]}
+                    onPress={() => handleTimeSelect(time)}
+                  >
+                    <Text style={[
+                      styles.timeChipText,
+                      selectedTime === time && styles.selectedTimeChipText
+                    ]}>
+                      {time}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
               </View>
-            </Dialog.Content>
-            <Dialog.Actions style={styles.dialogActions}>
-              <Button
-                onPress={() => setShowConfirmation(false)}
-                textColor={colors.text.secondary}
-                style={styles.dialogButton}
-              >
-                Cancelar
-              </Button>
               <Button
                 mode="contained"
-                onPress={handleConfirmBooking}
-                buttonColor={colors.primary.main}
-                textColor={colors.primary.contrast}
-                style={styles.dialogButton}
+                onPress={() => setShowTimeModal(false)}
+                style={styles.modalButton}
               >
-                Confirmar
+                Cerrar
               </Button>
-            </Dialog.Actions>
-          </Dialog>
-        </Portal>
+            </View>
+          </View>
+        </Modal>
+
+        <Modal
+          visible={showConfirmation}
+          transparent
+          animationType="fade"
+          onRequestClose={() => setShowConfirmation(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <View style={styles.confirmationModal}>
+              <Text style={styles.modalTitle}>Confirmar Reserva</Text>
+              <Text style={styles.confirmationText}>
+                ¿Estás seguro de que deseas reservar este servicio?
+              </Text>
+              <View style={styles.modalButtons}>
+                <Button
+                  mode="outlined"
+                  onPress={() => setShowConfirmation(false)}
+                  style={styles.modalButton}
+                >
+                  Cancelar
+                </Button>
+                <Button
+                  mode="contained"
+                  onPress={handleConfirmBooking}
+                  style={styles.modalButton}
+                >
+                  Confirmar
+                </Button>
+              </View>
+            </View>
+          </View>
+        </Modal>
 
         {selectedDate && (
           <Surface style={styles.selectedDateTime}>
@@ -283,31 +297,6 @@ export const BookingScreen: React.FC<Props> = ({ route, navigation }) => {
             </View>
           </Surface>
         )}
-
-        <Portal>
-          <Modal
-            visible={showTimeModal}
-            onDismiss={() => setShowTimeModal(false)}
-            contentContainerStyle={styles.timeModal}
-          >
-            <Text style={styles.modalTitle}>
-              Selecciona un horario
-            </Text>
-            <View style={styles.timeGrid}>
-              {TIME_SLOTS.map((time) => (
-                <Chip
-                  key={time}
-                  selected={selectedTime === time}
-                  onPress={() => handleTimeSelect(time)}
-                  style={styles.timeChip}
-                  selectedColor={colors.primary.main}
-                >
-                  {time}
-                </Chip>
-              ))}
-            </View>
-          </Modal>
-        </Portal>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
@@ -376,21 +365,36 @@ const styles = StyleSheet.create({
     marginBottom: spacing.md,
     backgroundColor: colors.background.primary,
   },
-  timeSlotsContainer: {
+  timeSelector: {
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: borderRadius.md,
+    padding: spacing.md,
+    backgroundColor: colors.surface.primary,
+  },
+  timeGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: spacing.xs,
-    marginBottom: spacing.md,
+    gap: spacing.sm,
+    marginBottom: spacing.lg,
   },
   timeChip: {
-    backgroundColor: colors.background.secondary,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    borderRadius: borderRadius.md,
+    backgroundColor: colors.surface.secondary,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  selectedTimeChip: {
+    backgroundColor: colors.primary.main,
+    borderColor: colors.primary.main,
   },
   timeChipText: {
-    ...textStyles.labelMedium,
-    color: colors.text.secondary,
+    color: colors.text.primary,
   },
-  timeChipTextSelected: {
-    color: colors.primary.main,
+  selectedTimeChipText: {
+    color: colors.surface.primary,
   },
   bookButton: {
     marginTop: spacing.md,
@@ -399,45 +403,44 @@ const styles = StyleSheet.create({
   bookButtonContent: {
     paddingVertical: spacing.sm,
   },
-  dialog: {
-    borderRadius: borderRadius.lg,
-    backgroundColor: colors.surface.modal,
-    margin: spacing.xl,
-  },
-  dialogTitle: {
-    color: colors.text.primary,
-    paddingTop: spacing.xl,
-    paddingHorizontal: spacing.xl,
-    paddingBottom: spacing.md,
-  },
-  dialogText: {
-    color: colors.text.primary,
-    marginBottom: spacing.lg,
-    paddingHorizontal: spacing.xl,
-  },
-  dialogSummary: {
-    backgroundColor: colors.surface.secondary,
-    padding: spacing.lg,
-    borderRadius: borderRadius.md,
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
     alignItems: 'center',
-    marginHorizontal: spacing.xl,
   },
-  dialogSummaryText: {
-    color: colors.text.secondary,
-    marginBottom: spacing.sm,
-  },
-  dialogPrice: {
-    color: colors.primary.main,
-  },
-  dialogActions: {
+  timeModal: {
+    backgroundColor: colors.surface.primary,
+    margin: spacing.md,
     padding: spacing.lg,
-    gap: spacing.md,
-    borderTopWidth: 1,
-    borderTopColor: colors.utility.divider,
+    borderRadius: borderRadius.lg,
+    width: '90%',
   },
-  dialogButton: {
-    minWidth: 120,
-    marginHorizontal: spacing.xs,
+  confirmationModal: {
+    backgroundColor: colors.surface.primary,
+    margin: spacing.md,
+    padding: spacing.lg,
+    borderRadius: borderRadius.lg,
+    width: '90%',
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: spacing.md,
+    color: colors.text.primary,
+  },
+  confirmationText: {
+    fontSize: 16,
+    marginBottom: spacing.lg,
+    color: colors.text.primary,
+  },
+  modalButtons: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    gap: spacing.sm,
+  },
+  modalButton: {
+    minWidth: 100,
   },
   selectedDateTime: {
     gap: spacing.sm,
@@ -451,29 +454,9 @@ const styles = StyleSheet.create({
     ...textStyles.bodyLarge,
     color: colors.text.primary,
   },
-  timeModal: {
-    backgroundColor: colors.surface.primary,
-    margin: spacing.md,
-    padding: spacing.lg,
-    borderRadius: borderRadius.lg,
-  },
-  modalTitle: {
-    ...textStyles.titleLarge,
-    color: colors.text.primary,
-    marginBottom: spacing.md,
-  },
-  timeGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: spacing.sm,
-  },
-  footer: {
-    padding: spacing.md,
-    backgroundColor: colors.surface.primary,
-    borderTopWidth: 1,
-    borderTopColor: colors.border,
-  },
-  confirmButton: {
-    borderRadius: borderRadius.md,
+  errorText: {
+    color: colors.error,
+    fontSize: 12,
+    marginTop: spacing.xs,
   },
 }); 
