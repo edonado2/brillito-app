@@ -1,60 +1,33 @@
 import React from 'react';
-import { View, StyleSheet, Platform } from 'react-native';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { Text } from 'react-native-paper';
-import { colors, typography, spacing } from '../theme/theme';
+import { View, Text, StyleSheet } from 'react-native';
+import { colors, textStyles } from '../theme';
 
-interface LogoProps {
+type LogoProps = {
   size?: 'small' | 'medium' | 'large';
-  color?: string;
   showText?: boolean;
-}
+};
 
-export const Logo: React.FC<LogoProps> = ({
-  size = 'medium',
-  color = colors.primary.main,
-  showText = true,
-}) => {
-  const getIconSize = () => {
+export const Logo = ({ size = 'medium', showText = true }: LogoProps) => {
+  const getSize = () => {
     switch (size) {
       case 'small':
-        return 24;
+        return { icon: 24, text: textStyles.titleMedium };
       case 'large':
-        return 48;
+        return { icon: 48, text: textStyles.displayMedium };
       default:
-        return 32;
+        return { icon: 32, text: textStyles.titleLarge };
     }
   };
 
-  const getTextSize = () => {
-    switch (size) {
-      case 'small':
-        return typography.fontSize.lg;
-      case 'large':
-        return typography.fontSize.xxxl;
-      default:
-        return typography.fontSize.xxl;
-    }
-  };
+  const { icon, text } = getSize();
 
   return (
     <View style={styles.container}>
-      <MaterialCommunityIcons
-        name="broom"
-        size={getIconSize()}
-        color={color}
-        style={styles.icon}
-      />
+      <View style={[styles.icon, { width: icon, height: icon }]}>
+        <Text style={[styles.iconText, { fontSize: icon * 0.6 }]}>✨</Text>
+      </View>
       {showText && (
-        <Text
-          style={[
-            styles.text,
-            {
-              fontSize: getTextSize(),
-              color,
-            },
-          ]}
-        >
+        <Text style={[styles.text, text, { color: colors.primary }]}>
           Brillito
         </Text>
       )}
@@ -66,34 +39,18 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.xs,
+    gap: 8,
   },
   icon: {
-    ...Platform.select({
-      ios: {
-        shadowColor: colors.utility.shadow,
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-      },
-      android: {
-        elevation: 4,
-      },
-    }),
+    backgroundColor: colors.primary,
+    borderRadius: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  iconText: {
+    color: colors.surface,
   },
   text: {
-    fontFamily: typography.fontFamily.bold,
-    letterSpacing: -0.5,
-    ...Platform.select({
-      ios: {
-        shadowColor: colors.utility.shadow,
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-      },
-      android: {
-        elevation: 4,
-      },
-    }),
+    fontWeight: 'bold',
   },
 }); 

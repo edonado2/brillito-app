@@ -89,10 +89,14 @@ const ServiceDetailsContent: React.FC<{
         (navigation as ServicesProps['navigation']).navigate('ServicesBooking', {
           serviceId: service.id,
           serviceName: service.title,
+          selectedDate,
+          selectedTime,
         });
       } else {
         (navigation as HomeProps['navigation']).navigate('HomeBooking', {
           serviceId: service.id,
+          selectedDate,
+          selectedTime,
         });
       }
     }

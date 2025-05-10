@@ -27,12 +27,14 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { colors, spacing, borderRadius, elevation, textStyles, typography } from '../theme/theme';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { ServicesStackParamList } from '../types/navigation';
+import { ServicesStackParamList, HomeStackParamList } from '../types/navigation';
 import { useAuth } from '../context/AuthContext';
 import { AppHeader } from '../components/AppHeader';
 import { Calendar } from 'react-native-calendars';
 
-type Props = NativeStackScreenProps<ServicesStackParamList, 'ServicesBooking'>;
+type ServicesProps = NativeStackScreenProps<ServicesStackParamList, 'ServicesBooking'>;
+type HomeProps = NativeStackScreenProps<HomeStackParamList, 'HomeBooking'>;
+type Props = ServicesProps | HomeProps;
 
 const TIME_SLOTS = [
   '08:00', '09:00', '10:00', '11:00', '12:00', '13:00',
@@ -42,24 +44,13 @@ const TIME_SLOTS = [
 export const BookingScreen: React.FC<Props> = ({ route, navigation }) => {
   const theme = useTheme();
   const { user } = useAuth();
-  const { serviceId, serviceName } = route.params;
-  const [selectedDate, setSelectedDate] = useState('');
-  const [selectedTime, setSelectedTime] = useState('');
+  const isServicesStack = 'ServicesBookingConfirmation' in navigation;
+  const { serviceId, selectedDate, selectedTime } = route.params;
+  const serviceName = isServicesStack ? (route.params as ServicesProps['route']['params']).serviceName : 'Servicio';
   const [address, setAddress] = useState<string>('');
   const [notes, setNotes] = useState<string>('');
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [showTimeModal, setShowTimeModal] = useState(false);
-
-  const handleDateSelect = (date: string) => {
-    setSelectedDate(date);
-    setShowTimeModal(true);
-  };
-
-  const handleTimeSelect = (time: string) => {
-    setSelectedTime(time);
-    setShowTimeModal(false);
-  };
 
   const handleBooking = () => {
     if (validateForm()) {
@@ -70,9 +61,6 @@ export const BookingScreen: React.FC<Props> = ({ route, navigation }) => {
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
     
-    if (!selectedTime) {
-      newErrors.time = 'Por favor selecciona una hora';
-    }
     if (!address.trim()) {
       newErrors.address = 'Por favor ingresa una dirección';
     }
@@ -83,9 +71,23 @@ export const BookingScreen: React.FC<Props> = ({ route, navigation }) => {
 
   const handleConfirmBooking = () => {
     setShowConfirmation(false);
-    navigation.navigate('ServicesBookingConfirmation', {
-      bookingId: '123', // Replace with actual booking ID
-    });
+    if (isServicesStack) {
+      (navigation as ServicesProps['navigation']).navigate('ServicesBookingConfirmation', {
+        bookingId: '123', // Replace with actual booking ID
+        serviceName,
+        date: selectedDate,
+        time: selectedTime,
+        address,
+      });
+    } else {
+      (navigation as HomeProps['navigation']).navigate('HomeBookingConfirmation', {
+        bookingId: '123', // Replace with actual booking ID
+        serviceName,
+        date: selectedDate,
+        time: selectedTime,
+        address,
+      });
+    }
   };
 
   return (
@@ -102,63 +104,39 @@ export const BookingScreen: React.FC<Props> = ({ route, navigation }) => {
                 {serviceName}
               </Text>
               <Text style={[textStyles.bodyMedium, styles.serviceDescription]}>
-                Selecciona la fecha y hora que mejor te convenga para tu servicio de limpieza.
+                Confirma los detalles de tu reserva y proporciona la dirección del servicio.
               </Text>
             </Surface>
 
             <Surface style={styles.formCard}>
-              <Text style={[textStyles.titleMedium, styles.sectionTitle]}>
-                Fecha
-              </Text>
-              <Calendar
-                onDayPress={(day) => handleDateSelect(day.dateString)}
-                markedDates={{
-                  [selectedDate]: {
-                    selected: true,
-                    selectedColor: colors.primary.main,
-                  },
-                }}
-                minDate={new Date().toISOString().split('T')[0]}
-                theme={{
-                  calendarBackground: colors.surface.primary,
-                  textSectionTitleColor: colors.text.primary,
-                  selectedDayBackgroundColor: colors.primary.main,
-                  selectedDayTextColor: colors.primary.contrast,
-                  todayTextColor: colors.primary.main,
-                  dayTextColor: colors.text.primary,
-                  textDisabledColor: colors.text.disabled,
-                  dotColor: colors.primary.main,
-                  selectedDotColor: colors.primary.contrast,
-                  arrowColor: colors.primary.main,
-                  monthTextColor: colors.text.primary,
-                  indicatorColor: colors.primary.main,
-                }}
-              />
-
-              <Text style={[textStyles.titleMedium, styles.sectionTitle]}>
-                Hora
-              </Text>
-              <TouchableOpacity 
-                style={styles.timeSelector}
-                onPress={() => setShowTimeModal(true)}
-              >
-                <Text>{selectedTime || 'Seleccionar hora'}</Text>
-              </TouchableOpacity>
-              {errors.time && (
-                <Text style={styles.errorText}>{errors.time}</Text>
-              )}
+              <View style={styles.selectedDateTime}>
+                <View style={styles.dateTimeItem}>
+                  <MaterialCommunityIcons
+                    name="calendar"
+                    size={24}
+                    color={theme.colors.primary}
+                  />
+                  <Text style={styles.dateTimeText}>{selectedDate}</Text>
+                </View>
+                <View style={styles.dateTimeItem}>
+                  <MaterialCommunityIcons
+                    name="clock-outline"
+                    size={24}
+                    color={theme.colors.primary}
+                  />
+                  <Text style={styles.dateTimeText}>{selectedTime}</Text>
+                </View>
+              </View>
 
               <Text style={[textStyles.titleMedium, styles.sectionTitle]}>
                 Dirección
               </Text>
               <TextInput
                 mode="outlined"
-                label="Ingresa la dirección del servicio"
+                label="Dirección del servicio"
                 value={address}
                 onChangeText={setAddress}
                 style={styles.input}
-                multiline
-                numberOfLines={3}
                 error={!!errors.address}
               />
               {errors.address && (
@@ -166,138 +144,60 @@ export const BookingScreen: React.FC<Props> = ({ route, navigation }) => {
               )}
 
               <Text style={[textStyles.titleMedium, styles.sectionTitle]}>
-                Notas Adicionales
+                Notas Adicionales (Opcional)
               </Text>
               <TextInput
                 mode="outlined"
-                label="Agrega notas o instrucciones especiales"
+                label="Instrucciones especiales o notas"
                 value={notes}
                 onChangeText={setNotes}
                 style={styles.input}
                 multiline
                 numberOfLines={4}
               />
-            </Surface>
 
-            <Button
-              mode="contained"
-              onPress={handleBooking}
-              style={styles.bookButton}
-              contentStyle={styles.bookButtonContent}
-            >
-              Confirmar Reserva
-            </Button>
-          </View>
-        </ScrollView>
-
-        <Modal
-          visible={showTimeModal}
-          transparent
-          animationType="slide"
-          onRequestClose={() => setShowTimeModal(false)}
-        >
-          <View style={styles.modalOverlay}>
-            <View style={styles.timeModal}>
-              <Text style={styles.modalTitle}>Seleccionar Hora</Text>
-              <View style={styles.timeGrid}>
-                {TIME_SLOTS.map((time) => (
-                  <TouchableOpacity
-                    key={time}
-                    style={[
-                      styles.timeChip,
-                      selectedTime === time && styles.selectedTimeChip
-                    ]}
-                    onPress={() => handleTimeSelect(time)}
-                  >
-                    <Text style={[
-                      styles.timeChipText,
-                      selectedTime === time && styles.selectedTimeChipText
-                    ]}>
-                      {time}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
               <Button
                 mode="contained"
-                onPress={() => setShowTimeModal(false)}
-                style={styles.modalButton}
+                onPress={handleBooking}
+                style={styles.bookButton}
+                contentStyle={styles.bookButtonContent}
               >
-                Cerrar
+                Confirmar Reserva
               </Button>
-            </View>
+            </Surface>
           </View>
-        </Modal>
-
-        <Modal
-          visible={showConfirmation}
-          transparent
-          animationType="fade"
-          onRequestClose={() => setShowConfirmation(false)}
-        >
-          <View style={styles.modalOverlay}>
-            <View style={styles.confirmationModal}>
-              <Text style={styles.modalTitle}>Confirmar Reserva</Text>
-              <Text style={styles.confirmationText}>
-                ¿Estás seguro de que deseas reservar este servicio?
-              </Text>
-              <View style={styles.modalButtons}>
-                <Button
-                  mode="outlined"
-                  onPress={() => setShowConfirmation(false)}
-                  style={styles.modalButton}
-                >
-                  Cancelar
-                </Button>
-                <Button
-                  mode="contained"
-                  onPress={handleConfirmBooking}
-                  style={styles.modalButton}
-                >
-                  Confirmar
-                </Button>
-              </View>
-            </View>
-          </View>
-        </Modal>
-
-        {selectedDate && (
-          <Surface style={styles.selectedDateTime}>
-            <Text style={styles.sectionTitle}>
-              Horario seleccionado
-            </Text>
-            <View style={styles.selectedDateTime}>
-              <View style={styles.dateTimeItem}>
-                <MaterialCommunityIcons
-                  name="calendar"
-                  size={24}
-                  color={colors.primary.main}
-                />
-                <Text style={styles.dateTimeText}>
-                  {new Date(selectedDate).toLocaleDateString('es-ES', {
-                    weekday: 'long',
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric',
-                  })}
-                </Text>
-              </View>
-              {selectedTime && (
-                <View style={styles.dateTimeItem}>
-                  <MaterialCommunityIcons
-                    name="clock-outline"
-                    size={24}
-                    color={colors.primary.main}
-                  />
-                  <Text style={styles.dateTimeText}>
-                    {selectedTime}
-                  </Text>
-                </View>
-              )}
-            </View>
-          </Surface>
-        )}
+        </ScrollView>
       </KeyboardAvoidingView>
+
+      <Portal>
+        <Dialog
+          visible={showConfirmation}
+          onDismiss={() => setShowConfirmation(false)}
+          style={styles.dialog}
+        >
+          <Dialog.Title>Confirmar Reserva</Dialog.Title>
+          <Dialog.Content>
+            <Text style={styles.dialogText}>
+              ¿Estás seguro de que deseas reservar este servicio?
+            </Text>
+            <View style={styles.dialogSummary}>
+              <Text style={styles.dialogSummaryText}>
+                Fecha: {selectedDate}
+              </Text>
+              <Text style={styles.dialogSummaryText}>
+                Hora: {selectedTime}
+              </Text>
+              <Text style={styles.dialogSummaryText}>
+                Dirección: {address}
+              </Text>
+            </View>
+          </Dialog.Content>
+          <Dialog.Actions>
+            <Button onPress={() => setShowConfirmation(false)}>Cancelar</Button>
+            <Button onPress={handleConfirmBooking}>Confirmar</Button>
+          </Dialog.Actions>
+        </Dialog>
+      </Portal>
     </SafeAreaView>
   );
 };
@@ -458,5 +358,22 @@ const styles = StyleSheet.create({
     color: colors.error,
     fontSize: 12,
     marginTop: spacing.xs,
+  },
+  dialog: {
+    backgroundColor: colors.surface.primary,
+    borderRadius: borderRadius.lg,
+    padding: spacing.lg,
+  },
+  dialogText: {
+    fontSize: 16,
+    marginBottom: spacing.lg,
+    color: colors.text.primary,
+  },
+  dialogSummary: {
+    marginBottom: spacing.lg,
+  },
+  dialogSummaryText: {
+    ...textStyles.bodyLarge,
+    color: colors.text.primary,
   },
 }); 

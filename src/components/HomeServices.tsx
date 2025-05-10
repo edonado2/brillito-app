@@ -1,62 +1,69 @@
 import React from 'react';
-import { StyleSheet, ScrollView, View, Platform, TouchableOpacity } from 'react-native';
-import { Text, Surface, useTheme } from 'react-native-paper';
-import { colors, spacing, borderRadius, elevation, textStyles } from '../theme/theme';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import { CompositeNavigationProp } from '@react-navigation/native';
+import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { MainTabParamList, HomeStackParamList } from '../types/navigation';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { services, Service } from '../data/services';
-import type { NavigationProp } from '@react-navigation/native';
-import { MainTabParamList } from '../types/navigation';
+import { colors } from '../theme';
+import { services } from '../data/services';
+
+type HomeServicesNavigationProp = CompositeNavigationProp<
+  NativeStackNavigationProp<HomeStackParamList, 'Home'>,
+  BottomTabNavigationProp<MainTabParamList, 'HomeStack'>
+>;
 
 type Props = {
-  navigation: NavigationProp<MainTabParamList>;
+  navigation: HomeServicesNavigationProp;
 };
 
 export const HomeServices: React.FC<Props> = ({ navigation }) => {
-  const theme = useTheme();
-  const featuredServices = services;
-
-  const handleServicePress = (service: Service) => {
-    navigation.navigate('Home', {
-      screen: 'HomeServiceDetails',
-      params: { serviceId: service.id }
+  const handleServicePress = (service: typeof services[0]) => {
+    navigation.navigate('HomeServiceDetails', {
+      serviceId: service.id,
+      serviceName: service.title
     });
   };
 
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>Servicios Populares</Text>
-        <Text style={styles.subtitle}>Descubre nuestros servicios más solicitados</Text>
+        <Text style={styles.title}>Popular Services</Text>
+        <TouchableOpacity 
+          style={styles.seeAllButton}
+          onPress={() => navigation.navigate('ServicesStack')}
+        >
+          <Text style={styles.seeAllText}>See All</Text>
+          <MaterialCommunityIcons name="chevron-right" size={16} color={colors.primary} />
+        </TouchableOpacity>
       </View>
 
-      <ScrollView
-        horizontal
+      <ScrollView 
+        horizontal 
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
       >
-        {featuredServices.map(service => (
+        {services.map((service) => (
           <TouchableOpacity
             key={service.id}
+            style={styles.card}
             onPress={() => handleServicePress(service)}
             activeOpacity={0.7}
           >
-            <Surface style={styles.serviceCard}>
+            <View style={styles.cardContent}>
               <View style={styles.serviceIconContainer}>
-                <MaterialCommunityIcons
-                  name={service.icon}
-                  size={32}
-                  color={theme.colors.primary}
-                />
+                <MaterialCommunityIcons name={service.icon} size={32} color={colors.primary} />
               </View>
-              <Text style={styles.serviceTitle}>{service.title}</Text>
-              <Text style={styles.serviceDescription} numberOfLines={4}>
+              <Text style={styles.serviceName}>{service.title}</Text>
+              <Text style={styles.description} numberOfLines={2}>
                 {service.description}
               </Text>
-              <View style={styles.serviceFooter}>
-                <Text style={styles.serviceDuration}>{service.duration}</Text>
-                <Text style={styles.servicePrice}>${service.price}</Text>
+              <View style={styles.footer}>
+                <Text style={styles.duration}>{service.duration}</Text>
+                <Text style={styles.price}>${service.price}</Text>
               </View>
-            </Surface>
+            </View>
           </TouchableOpacity>
         ))}
       </ScrollView>
@@ -66,82 +73,82 @@ export const HomeServices: React.FC<Props> = ({ navigation }) => {
 
 const styles = StyleSheet.create({
   container: {
-    marginVertical: spacing.xl,
+    marginTop: 24,
   },
   header: {
-    paddingHorizontal: spacing.xl,
-    marginBottom: spacing.lg,
-  },
-  title: {
-    ...textStyles.titleLarge,
-    color: colors.text.primary,
-    marginBottom: spacing.xs,
-  },
-  subtitle: {
-    ...textStyles.bodyMedium,
-    color: colors.text.secondary,
-  },
-  scrollContent: {
-    paddingHorizontal: spacing.xl,
-    gap: spacing.lg,
-  },
-  serviceCard: {
-    width: 240,
-    height: 280,
-    padding: spacing.lg,
-    borderRadius: borderRadius.lg,
-    backgroundColor: colors.surface.primary,
-    marginHorizontal: spacing.sm,
-    ...Platform.select({
-      ios: {
-        shadowColor: colors.utility.shadow,
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 8,
-      },
-      android: {
-        elevation: elevation.md,
-      },
-    }),
-  },
-  serviceIconContainer: {
-    width: 48,
-    height: 48,
-    borderRadius: borderRadius.md,
-    backgroundColor: colors.primary.light,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: spacing.md,
-  },
-  serviceTitle: {
-    ...textStyles.titleMedium,
-    color: colors.text.primary,
-    marginBottom: spacing.md,
-    lineHeight: 24,
-  },
-  serviceDescription: {
-    ...textStyles.bodyLarge,
-    color: colors.text.secondary,
-    marginBottom: spacing.md,
-    flex: 1,
-    lineHeight: 22,
-    opacity: 0.9,
-  },
-  serviceFooter: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginTop: 'auto',
-    paddingTop: spacing.md,
-    borderTopWidth: 1,
-    borderTopColor: colors.border,
+    marginBottom: 16,
+    paddingHorizontal: 16,
   },
-  serviceDuration: {
-    ...textStyles.bodyMedium,
+  title: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: colors.text.primary,
+  },
+  seeAllButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  seeAllText: {
+    fontSize: 14,
+    color: colors.primary,
+    marginRight: 4,
+  },
+  scrollContent: {
+    paddingHorizontal: 16,
+    gap: 16,
+  },
+  card: {
+    width: 300,
+    backgroundColor: colors.surface,
+    borderRadius: 16,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  cardContent: {
+    padding: 20,
+  },
+  serviceIconContainer: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: colors.primary + '20',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 16,
+  },
+  serviceName: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: colors.text.primary,
+    marginBottom: 8,
+  },
+  description: {
+    fontSize: 15,
+    color: colors.text.secondary,
+    marginBottom: 16,
+    lineHeight: 22,
+  },
+  footer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  duration: {
+    fontSize: 15,
     color: colors.text.secondary,
   },
-  servicePrice: {
-    ...textStyles.titleMedium,
-    color: colors.primary.main,
+  price: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: colors.primary,
   },
 }); 
