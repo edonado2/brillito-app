@@ -21,4 +21,10 @@ export interface RegisterCredentials extends LoginCredentials {
   name: string;
   phone?: string;
   address?: string;
+}
+
+export interface ChangePasswordCredentials {
+  currentPassword: string;
+  newPassword: string;
+  confirmPassword: string;
 } 

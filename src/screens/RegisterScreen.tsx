@@ -1,189 +1,125 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
-import { TextInput, Button, Text, useTheme, HelperText } from 'react-native-paper';
+import { StyleSheet, View, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
+import { Text, TextInput, Button, Surface } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useAuth } from '../context/AuthContext';
-import { colors } from '../theme/theme';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { RootStackParamList } from '../types/navigation';
+import type { AuthStackParamList } from '../types/navigation';
+import { useAuth } from '../context/AuthContext';
+import { colors, spacing, borderRadius, elevation, textStyles } from '../theme/theme';
 
-type Props = NativeStackScreenProps<RootStackParamList, 'Register'>;
+type Props = NativeStackScreenProps<AuthStackParamList, 'Register'>;
 
 export const RegisterScreen: React.FC<Props> = ({ navigation }) => {
-  const theme = useTheme();
-  const { register, error, isLoading } = useAuth();
+  const { signUp } = useAuth();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [phone, setPhone] = useState('');
-  const [address, setAddress] = useState('');
-  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const validateEmail = (email: string) => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
-  };
-
-  const validateForm = () => {
-    const newErrors: Record<string, string> = {};
-
-    if (!name.trim()) {
-      newErrors.name = 'Name is required';
-    }
-
-    if (!email) {
-      newErrors.email = 'Email is required';
-    } else if (!validateEmail(email)) {
-      newErrors.email = 'Invalid email format';
-    }
-
-    if (!password) {
-      newErrors.password = 'Password is required';
-    } else if (password.length < 6) {
-      newErrors.password = 'Password must be at least 6 characters';
+  const handleRegister = async () => {
+    if (!name || !email || !password || !confirmPassword) {
+      setError('Please fill in all fields');
+      return;
     }
 
     if (password !== confirmPassword) {
-      newErrors.confirmPassword = 'Passwords do not match';
+      setError('Passwords do not match');
+      return;
     }
 
-    if (phone && !/^\+?[\d\s-]{10,}$/.test(phone)) {
-      newErrors.phone = 'Invalid phone number';
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleRegister = async () => {
-    if (validateForm()) {
-      await register({
-        name,
-        email,
-        password,
-        phone: phone || undefined,
-        address: address || undefined,
-      });
+    try {
+      setIsLoading(true);
+      setError(null);
+      await signUp(email, password, name);
+    } catch (err) {
+      setError('Registration failed. Please try again.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top']}>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={styles.keyboardAvoid}
+        style={styles.keyboardAvoidingView}
       >
-        <ScrollView contentContainerStyle={styles.scrollContent}>
-          <View style={styles.header}>
-            <Text variant="headlineMedium" style={styles.title}>
+        <ScrollView
+          contentContainerStyle={styles.scrollContent}
+          keyboardShouldPersistTaps="handled"
+        >
+          <Surface style={styles.formContainer}>
+            <Text style={[textStyles.headlineLarge, styles.title]}>
               Create Account
             </Text>
-            <Text variant="bodyLarge" style={styles.subtitle}>
+            <Text style={[textStyles.bodyLarge, styles.subtitle]}>
               Sign up to get started
             </Text>
-          </View>
 
-          <View style={styles.form}>
-            <TextInput
-              label="Full Name"
-              value={name}
-              onChangeText={setName}
-              mode="outlined"
-              error={!!errors.name}
-              style={styles.input}
-            />
-            <HelperText type="error" visible={!!errors.name}>
-              {errors.name}
-            </HelperText>
+            <View style={styles.inputContainer}>
+              <TextInput
+                label="Full Name"
+                value={name}
+                onChangeText={setName}
+                style={styles.input}
+                mode="outlined"
+              />
 
-            <TextInput
-              label="Email"
-              value={email}
-              onChangeText={setEmail}
-              mode="outlined"
-              keyboardType="email-address"
-              autoCapitalize="none"
-              error={!!errors.email}
-              style={styles.input}
-            />
-            <HelperText type="error" visible={!!errors.email}>
-              {errors.email}
-            </HelperText>
+              <TextInput
+                label="Email"
+                value={email}
+                onChangeText={setEmail}
+                autoCapitalize="none"
+                keyboardType="email-address"
+                style={styles.input}
+                mode="outlined"
+              />
 
-            <TextInput
-              label="Password"
-              value={password}
-              onChangeText={setPassword}
-              mode="outlined"
-              secureTextEntry
-              error={!!errors.password}
-              style={styles.input}
-            />
-            <HelperText type="error" visible={!!errors.password}>
-              {errors.password}
-            </HelperText>
+              <TextInput
+                label="Password"
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry
+                style={styles.input}
+                mode="outlined"
+              />
 
-            <TextInput
-              label="Confirm Password"
-              value={confirmPassword}
-              onChangeText={setConfirmPassword}
-              mode="outlined"
-              secureTextEntry
-              error={!!errors.confirmPassword}
-              style={styles.input}
-            />
-            <HelperText type="error" visible={!!errors.confirmPassword}>
-              {errors.confirmPassword}
-            </HelperText>
+              <TextInput
+                label="Confirm Password"
+                value={confirmPassword}
+                onChangeText={setConfirmPassword}
+                secureTextEntry
+                style={styles.input}
+                mode="outlined"
+              />
 
-            <TextInput
-              label="Phone (optional)"
-              value={phone}
-              onChangeText={setPhone}
-              mode="outlined"
-              keyboardType="phone-pad"
-              error={!!errors.phone}
-              style={styles.input}
-            />
-            <HelperText type="error" visible={!!errors.phone}>
-              {errors.phone}
-            </HelperText>
+              {error && (
+                <Text style={styles.errorText}>
+                  {error}
+                </Text>
+              )}
 
-            <TextInput
-              label="Address (optional)"
-              value={address}
-              onChangeText={setAddress}
-              mode="outlined"
-              multiline
-              numberOfLines={2}
-              style={styles.input}
-            />
+              <Button
+                mode="contained"
+                onPress={handleRegister}
+                loading={isLoading}
+                disabled={isLoading}
+                style={styles.button}
+              >
+                Sign Up
+              </Button>
 
-            {error && (
-              <HelperText type="error" visible={true}>
-                {error}
-              </HelperText>
-            )}
-
-            <Button
-              mode="contained"
-              onPress={handleRegister}
-              loading={isLoading}
-              disabled={isLoading}
-              style={styles.button}
-            >
-              Sign Up
-            </Button>
-
-            <Button
-              mode="text"
-              onPress={() => navigation.navigate('Login')}
-              style={styles.linkButton}
-            >
-              Already have an account? Sign In
-            </Button>
-          </View>
+              <Button
+                mode="text"
+                onPress={() => navigation.navigate('Login')}
+                style={styles.linkButton}
+              >
+                Already have an account? Sign In
+              </Button>
+            </View>
+          </Surface>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -193,39 +129,57 @@ export const RegisterScreen: React.FC<Props> = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: colors.background.primary,
   },
-  keyboardAvoid: {
+  keyboardAvoidingView: {
     flex: 1,
   },
   scrollContent: {
     flexGrow: 1,
-    padding: 24,
+    justifyContent: 'center',
+    padding: spacing.md,
   },
-  header: {
-    alignItems: 'center',
-    marginBottom: 32,
+  formContainer: {
+    padding: spacing.xl,
+    borderRadius: borderRadius.lg,
+    backgroundColor: colors.surface.primary,
+    ...Platform.select({
+      ios: {
+        shadowColor: colors.shadow,
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 8,
+      },
+      android: {
+        elevation: elevation.md,
+      },
+    }),
   },
   title: {
-    color: colors.primary,
-    fontWeight: 'bold',
-    marginBottom: 8,
+    color: colors.text.primary,
+    textAlign: 'center',
+    marginBottom: spacing.xs,
   },
   subtitle: {
-    color: colors.text,
-    opacity: 0.7,
+    color: colors.text.secondary,
+    textAlign: 'center',
+    marginBottom: spacing.xl,
   },
-  form: {
-    gap: 8,
+  inputContainer: {
+    gap: spacing.md,
   },
   input: {
-    backgroundColor: colors.background,
+    backgroundColor: colors.background.primary,
+  },
+  errorText: {
+    color: colors.error.main,
+    textAlign: 'center',
+    marginTop: spacing.xs,
   },
   button: {
-    marginTop: 16,
-    paddingVertical: 8,
+    marginTop: spacing.md,
   },
   linkButton: {
-    marginTop: 8,
+    marginTop: spacing.sm,
   },
 }); 

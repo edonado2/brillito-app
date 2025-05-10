@@ -1,86 +1,85 @@
-export type PlanType = 'small' | 'medium' | 'large' | 'business';
+export type PlanType = 'basic' | 'standard' | 'premium' | 'business';
 
 export interface CleaningPlan {
   id: string;
   type: PlanType;
-  title: string;
-  description: string;
+  name: string;
   price: number;
   duration: string;
+  description: string;
   features: string[];
-  icon: string;
   recommended?: boolean;
+  icon: string;
 }
 
 export const cleaningPlans: CleaningPlan[] = [
   {
-    id: 'small',
-    type: 'small',
-    title: 'Small Home',
-    description: 'Perfect for apartments and small houses up to 1000 sq ft',
-    price: 89,
-    duration: '2-3 hours',
+    id: 'basic',
+    type: 'basic',
+    name: 'Limpieza Básica',
+    price: 25,
+    duration: '1-2 horas',
+    description: 'Ideal para apartamentos pequeños y estudios',
     features: [
-      'Basic cleaning of all rooms',
-      'Bathroom cleaning',
-      'Kitchen cleaning',
-      'Dusting and vacuuming',
-      'Window cleaning (interior)'
+      'Limpieza general de superficies',
+      'Limpieza de baños',
+      'Limpieza de cocina básica',
+      'Barrido y trapeado de pisos',
+      'Organización básica',
     ],
-    icon: 'home',
+    icon: 'broom',
   },
   {
-    id: 'medium',
-    type: 'medium',
-    title: 'Medium Home',
-    description: 'Ideal for medium-sized houses up to 2000 sq ft',
-    price: 149,
-    duration: '3-4 hours',
+    id: 'standard',
+    type: 'standard',
+    name: 'Limpieza Estándar',
+    price: 45,
+    duration: '2-3 horas',
+    description: 'Perfecta para casas medianas y familias',
     features: [
-      'Everything in Small Home plan',
-      'Deep cleaning of bathrooms',
-      'Detailed kitchen cleaning',
-      'Floor mopping and polishing',
-      'Cabinet cleaning',
-      'Appliance cleaning'
+      'Todo lo incluido en Básica',
+      'Limpieza profunda de cocina',
+      'Limpieza de electrodomésticos',
+      'Limpieza de ventanas interiores',
+      'Organización de espacios',
+      'Limpieza de closets',
     ],
-    icon: 'home-city',
     recommended: true,
+    icon: 'broom',
   },
   {
-    id: 'large',
-    type: 'large',
-    title: 'Large Home',
-    description: 'Comprehensive cleaning for large houses up to 3000 sq ft',
-    price: 249,
-    duration: '4-6 hours',
+    id: 'premium',
+    type: 'premium',
+    name: 'Limpieza Premium',
+    price: 75,
+    duration: '3-4 horas',
+    description: 'Para casas grandes que necesitan atención especial',
     features: [
-      'Everything in Medium Home plan',
-      'Deep cleaning of all rooms',
-      'Detailed window cleaning',
-      'Baseboard cleaning',
-      'Closet organization',
-      'Laundry room cleaning',
-      'Garage cleaning'
+      'Todo lo incluido en Estándar',
+      'Limpieza profunda de baños',
+      'Limpieza de muebles',
+      'Limpieza de alfombras',
+      'Limpieza de ventanas exteriores',
+      'Organización completa',
+      'Limpieza de áreas exteriores',
     ],
-    icon: 'home-group',
+    icon: 'broom',
   },
   {
     id: 'business',
     type: 'business',
-    title: 'Business',
-    description: 'Professional cleaning for offices and commercial spaces',
-    price: 299,
-    duration: '4-8 hours',
+    name: 'Limpieza Empresarial',
+    price: 100,
+    duration: '4-6 horas',
+    description: 'Servicio completo para espacios comerciales',
     features: [
-      'Complete office cleaning',
-      'Reception area cleaning',
-      'Conference room cleaning',
-      'Restroom sanitization',
-      'Kitchen/break room cleaning',
-      'Floor care and maintenance',
-      'Trash removal',
-      'Custom cleaning schedule available'
+      'Todo lo incluido en Premium',
+      'Limpieza de oficinas',
+      'Limpieza de áreas comunes',
+      'Limpieza de equipos',
+      'Manejo de residuos',
+      'Servicio personalizado',
+      'Horario flexible',
     ],
     icon: 'office-building',
   },

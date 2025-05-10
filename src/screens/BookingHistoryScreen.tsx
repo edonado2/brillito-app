@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { StyleSheet, View, ScrollView } from 'react-native';
-import { Text, useTheme, Appbar, Chip, Surface, IconButton } from 'react-native-paper';
+import { Text, useTheme, Chip, Surface, IconButton } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { colors } from '../theme/theme';
+import { colors, spacing } from '../theme/theme';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../types/navigation';
 import { Booking, mockBookings, BookingStatus } from '../types/bookings';
+import { AppHeader } from '../components/AppHeader';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'BookingHistory'>;
 
@@ -46,7 +47,7 @@ export const BookingHistoryScreen: React.FC<Props> = ({ navigation }) => {
   );
 
   const formatDate = (date: Date) => {
-    return date.toLocaleDateString('en-US', {
+    return date.toLocaleDateString('es-ES', {
       weekday: 'short',
       month: 'short',
       day: 'numeric',
@@ -54,74 +55,70 @@ export const BookingHistoryScreen: React.FC<Props> = ({ navigation }) => {
   };
 
   const formatTime = (date: Date) => {
-    return date.toLocaleTimeString('en-US', {
+    return date.toLocaleTimeString('es-ES', {
       hour: '2-digit',
       minute: '2-digit',
     });
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <Appbar.Header style={styles.header}>
-        <Appbar.BackAction onPress={() => navigation.goBack()} />
-        <Appbar.Content title="Booking History" />
-      </Appbar.Header>
-
-      <View style={styles.filterContainer}>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-          <Chip
-            selected={selectedStatus === 'all'}
-            onPress={() => setSelectedStatus('all')}
-            style={styles.chip}
-          >
-            All
-          </Chip>
-          <Chip
-            selected={selectedStatus === 'scheduled'}
-            onPress={() => setSelectedStatus('scheduled')}
-            style={styles.chip}
-            icon={() => (
-              <MaterialCommunityIcons
-                name="clock-outline"
-                size={16}
-                color={selectedStatus === 'scheduled' ? colors.background : colors.primary}
-              />
-            )}
-          >
-            Scheduled
-          </Chip>
-          <Chip
-            selected={selectedStatus === 'completed'}
-            onPress={() => setSelectedStatus('completed')}
-            style={styles.chip}
-            icon={() => (
-              <MaterialCommunityIcons
-                name="check-circle"
-                size={16}
-                color={selectedStatus === 'completed' ? colors.background : colors.success}
-              />
-            )}
-          >
-            Completed
-          </Chip>
-          <Chip
-            selected={selectedStatus === 'cancelled'}
-            onPress={() => setSelectedStatus('cancelled')}
-            style={styles.chip}
-            icon={() => (
-              <MaterialCommunityIcons
-                name="close-circle"
-                size={16}
-                color={selectedStatus === 'cancelled' ? colors.background : colors.error}
-              />
-            )}
-          >
-            Cancelled
-          </Chip>
-        </ScrollView>
-      </View>
-
+    <SafeAreaView style={styles.container} edges={['top']}>
+      <AppHeader title="Mis Reservas" />
       <ScrollView style={styles.scrollView}>
+        <View style={styles.filterContainer}>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+            <Chip
+              selected={selectedStatus === 'all'}
+              onPress={() => setSelectedStatus('all')}
+              style={styles.chip}
+            >
+              All
+            </Chip>
+            <Chip
+              selected={selectedStatus === 'scheduled'}
+              onPress={() => setSelectedStatus('scheduled')}
+              style={styles.chip}
+              icon={() => (
+                <MaterialCommunityIcons
+                  name="clock-outline"
+                  size={16}
+                  color={selectedStatus === 'scheduled' ? colors.background : colors.primary}
+                />
+              )}
+            >
+              Scheduled
+            </Chip>
+            <Chip
+              selected={selectedStatus === 'completed'}
+              onPress={() => setSelectedStatus('completed')}
+              style={styles.chip}
+              icon={() => (
+                <MaterialCommunityIcons
+                  name="check-circle"
+                  size={16}
+                  color={selectedStatus === 'completed' ? colors.background : colors.success}
+                />
+              )}
+            >
+              Completed
+            </Chip>
+            <Chip
+              selected={selectedStatus === 'cancelled'}
+              onPress={() => setSelectedStatus('cancelled')}
+              style={styles.chip}
+              icon={() => (
+                <MaterialCommunityIcons
+                  name="close-circle"
+                  size={16}
+                  color={selectedStatus === 'cancelled' ? colors.background : colors.error}
+                />
+              )}
+            >
+              Cancelled
+            </Chip>
+          </ScrollView>
+        </View>
+
         {filteredBookings.map((booking) => (
           <Surface key={booking.id} style={styles.bookingCard}>
             <View style={styles.bookingHeader}>
@@ -213,11 +210,10 @@ export const BookingHistoryScreen: React.FC<Props> = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: colors.background.primary,
   },
-  header: {
-    backgroundColor: colors.primary,
-    elevation: 0,
+  scrollView: {
+    flex: 1,
   },
   filterContainer: {
     padding: 16,
@@ -226,10 +222,6 @@ const styles = StyleSheet.create({
   },
   chip: {
     marginRight: 8,
-  },
-  scrollView: {
-    flex: 1,
-    padding: 16,
   },
   bookingCard: {
     marginBottom: 16,
